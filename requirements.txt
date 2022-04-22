@@ -34,3 +34,4 @@ ir_measures>=0.2.1
 # misc
 pytools>=2018.5.2
 cached-property>=1.5.1
+GitPython

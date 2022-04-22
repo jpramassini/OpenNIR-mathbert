@@ -5,11 +5,28 @@ import torch
 import pytorch_pretrained_bert
 from pytorch_pretrained_bert import BertForPreTraining, BertConfig
 from onir import util
+from git import Repo
 
 
 def _hugging_handler(name, base_path, logger):
     # Just use the default huggingface handler for model
     return name
+
+def _mathbert_handler():
+    url = 'https://huggingface.co/tbs17/MathBERT'
+    def wrapped(name, base_path, logger):
+        path = os.path.join(base_path, name)
+        if not os.path.exists(path):
+            # Download from HuggingFace.
+            Repo.clone_from(url, path)
+
+            weights_tarball = os.path.join(path, 'weights.tar.gz')
+            util.extract_tarball(weights_tarball, path, logger, reset_permissions=True)
+            os.remove(weights_tarball)
+            os.rename(os.path.join(path, 'bert_config.json'), os.path.join(path, 'config.json'))
+            # os.remove(os.path.join(path, ".git"))
+        return path
+    return wrapped
 
 
 def _scibert_handler(url_seg, expected_md5=None):
@@ -56,6 +73,7 @@ MODEL_MAP = {
     'biobert-pubmed-pmc':_biobert_handler('v1.0-pubmed-pmc/biobert_pubmed_pmc.tar.gz'),
     'biobert-pubmed':_biobert_handler('v1.0-pubmed/biobert_pubmed.tar.gz'),
     'biobert-pmc':_biobert_handler('v1.0-pmc/biobert_pmc.tar.gz'),
+    'mathbert-basevocab-uncased': _mathbert_handler(),
     **{m:_hugging_handler for m in pytorch_pretrained_bert.modeling.PRETRAINED_MODEL_ARCHIVE_MAP},
 }
 
