@@ -17,12 +17,16 @@ def _mathbert_handler():
     print("LOADING MATHBERT...")
     def wrapped(name, base_path, logger):
         path = os.path.join(base_path, name)
+        print(f"MathBert Path: {path}")
         if not os.path.exists(path):
             # Download from HuggingFace.
             Repo.clone_from(url, path)
 
             os.rename(os.path.join(path, 'bert_config.json'), os.path.join(path, 'config.json'))
             # os.remove(os.path.join(path, ".git"))
+        # here for debugging output
+        for item in os.scandir(path):
+            print(item)
         return path
     return wrapped
 
