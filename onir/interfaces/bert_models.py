@@ -14,15 +14,13 @@ def _hugging_handler(name, base_path, logger):
 
 def _mathbert_handler():
     url = 'https://huggingface.co/tbs17/MathBERT'
+    print("LOADING MATHBERT...")
     def wrapped(name, base_path, logger):
         path = os.path.join(base_path, name)
         if not os.path.exists(path):
             # Download from HuggingFace.
             Repo.clone_from(url, path)
 
-            weights_tarball = os.path.join(path, 'weights.tar.gz')
-            util.extract_tarball(weights_tarball, path, logger, reset_permissions=True)
-            os.remove(weights_tarball)
             os.rename(os.path.join(path, 'bert_config.json'), os.path.join(path, 'config.json'))
             # os.remove(os.path.join(path, ".git"))
         return path
