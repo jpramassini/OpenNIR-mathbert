@@ -1,4 +1,5 @@
 vocab=bert
+vocab.bert_base=mathbert-basevocab-uncased
 vocab.train=True
 trainer.encoder_lr=2e-5
 trainer.grad_acc_batch=2

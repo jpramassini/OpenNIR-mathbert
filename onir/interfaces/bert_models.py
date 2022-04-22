@@ -7,27 +7,43 @@ from pytorch_pretrained_bert import BertForPreTraining, BertConfig
 from onir import util
 from git import Repo
 
+from onir.util.download import download_if_needed
+
 
 def _hugging_handler(name, base_path, logger):
     # Just use the default huggingface handler for model
     return name
 
+
 def _mathbert_handler():
-    url = 'https://huggingface.co/tbs17/MathBERT'
+    url_old = 'https://huggingface.co/tbs17/MathBERT'
+    url = 'http://tracy-nlp-models.s3.amazonaws.com/mathbert-basevocab-uncased/'
     print("LOADING MATHBERT...")
     def wrapped(name, base_path, logger):
         path = os.path.join(base_path, name)
         print(f"MathBert Path: {path}")
-        if not os.path.exists(path):
+        # if not os.path.exists(path):
+        if True:
             # Download from HuggingFace.
-            Repo.clone_from(url, path)
+            # Repo.clone_from(url_old, path)
 
-            os.rename(os.path.join(path, 'bert_config.json'), os.path.join(path, 'config.json'))
-            # os.remove(os.path.join(path, ".git"))
-        # here for debugging output
-        for item in os.scandir(path):
-            print(item)
-        return path
+            download_if_needed(url + "bert_config.json", os.path.join(path, "bert_config.json"))
+            download_if_needed(url + "vocab.txt", os.path.join(path, "vocab.txt"))
+            download_if_needed(url + "bert_model.ckpt.index", os.path.join(path, "bert_model.ckpt.index"))
+            download_if_needed(url + "bert_model.ckpt.meta", os.path.join(path, "bert_model.ckpt.meta"))
+            download_if_needed(url + "bert_model.ckpt.data-00000-of-00001", os.path.join(path, "bert_model.ckpt.data-00000-of-00001"))
+
+            _convert_tf_checkpoint_to_pytorch(os.path.join(path, 'bert_model.ckpt'),
+                                            os.path.join(path, "bert_config.json"),
+                                            os.path.join(path, "pytorch_model.bin"))
+            
+            for file in os.listdir(path):
+                if file not in ('bert_config.json', 'pytorch_model.bin', 'vocab.txt'):
+                    if os.path.isfile(os.path.join(path, file)):
+                        os.remove(os.path.join(path, file))
+                    else:
+                        os.rmdir(os.path.join(path, file))
+        return path 
     return wrapped
 
 
@@ -83,7 +99,8 @@ MODEL_MAP = {
 # shortcuts for "recommended" configurations
 MODEL_ALIAS = {
     'scibert': 'scibert-scivocab-uncased',
-    'biobert': 'biobert-pubmed-pmc'
+    'biobert': 'biobert-pubmed-pmc',
+    'mathbert': 'mathbert-basevocab-uncased'
 }
 
 

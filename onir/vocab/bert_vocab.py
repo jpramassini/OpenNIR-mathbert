@@ -13,7 +13,7 @@ class BertVocab(vocab.Vocab):
     @staticmethod
     def default_config():
         return {
-            'bert_base': 'bert-base-uncased',
+            'bert_base': 'mathbert-basevocab-uncased',
             'bert_weights': '',     # TODO: merge bert_base and bert_weights somehow, better integrate fine-tuning BERT into pipeline
             'layer': -1, # all layers
             'last_layer': False,
